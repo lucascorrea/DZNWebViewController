@@ -72,6 +72,7 @@ typedef NS_OPTIONS(NSUInteger, DZNWebNavigationPrompt) {
 @property (nonatomic) BOOL hideBarsWithGestures;
 /** [Deprecated] YES if should set the title automatically based on the page title and URL. Default is YES. */
 @property (nonatomic) BOOL showPageTitleAndURL __deprecated_msg("Use 'webNavigationPrompt' instead.");
+@property (nonatomic, getter=isShowToolbar) BOOL showToolbar;
 
 ///------------------------------------------------
 /// @name Initialization

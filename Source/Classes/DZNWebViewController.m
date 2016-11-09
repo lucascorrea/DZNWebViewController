@@ -50,7 +50,7 @@ static char DZNWebViewControllerKVOContext = 0;
 - (instancetype)initWithURL:(NSURL *)URL
 {
     NSParameterAssert(URL);
-
+    
     self = [self init];
     if (self) {
         _URL = URL;
@@ -133,14 +133,14 @@ static char DZNWebViewControllerKVOContext = 0;
 
 - (void)viewWillDisappear:(BOOL)animated
 {
-	[super viewWillDisappear:animated];
+    [super viewWillDisappear:animated];
     
     [self clearProgressViewAnimated:animated];
 }
 
 - (void)viewDidDisappear:(BOOL)animated
 {
-	[super viewDidDisappear:animated];
+    [super viewDidDisappear:animated];
     
     [self.webView stopLoading];
 }
@@ -400,7 +400,7 @@ static char DZNWebViewControllerKVOContext = 0;
     NSDictionary *attributes = @{NSFontAttributeName: titleFont, NSForegroundColorAttributeName: textColor};
     NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:text attributes:attributes];
     NSRange urlRange = [text rangeOfString:url];
-
+    
     if (urlRange.location != NSNotFound && self.showNavigationPromptTitle) {
         [attributedString addAttribute:NSFontAttributeName value:urlFont range:urlRange];
     }
@@ -457,7 +457,7 @@ static char DZNWebViewControllerKVOContext = 0;
     if ([URL isFileURL]) {
         NSData *data = [[NSData alloc] initWithContentsOfURL:URL];
         NSString *HTMLString = [[NSString alloc] initWithData:data encoding:NSStringEncodingConversionAllowLossy];
-
+        
         [self.webView loadHTMLString:HTMLString baseURL:baseURL];
     }
     else {
@@ -496,7 +496,7 @@ static char DZNWebViewControllerKVOContext = 0;
     if (!self.allowHistory || self.webView.backForwardList.backList.count == 0 || sender.state != UIGestureRecognizerStateBegan) {
         return;
     }
-
+    
     [self presentHistoryControllerForTool:DZNWebNavigationToolBackward fromView:sender.view];
 }
 
@@ -532,11 +532,14 @@ static char DZNWebViewControllerKVOContext = 0;
 
 - (void)configureToolBars
 {
-    if (DZN_IS_IPAD) {
-        self.navigationItem.rightBarButtonItems = [[[self navigationToolItems] reverseObjectEnumerator] allObjects];
-    }
-    else {
-        [self setToolbarItems:[self navigationToolItems]];
+    //If NO not show toolbar
+    if (self.isShowToolbar) {
+        if (DZN_IS_IPAD) {
+            self.navigationItem.rightBarButtonItems = [[[self navigationToolItems] reverseObjectEnumerator] allObjects];
+        }
+        else {
+            [self setToolbarItems:[self navigationToolItems]];
+        }
     }
     
     self.toolbar = self.navigationController.toolbar;
@@ -546,16 +549,18 @@ static char DZNWebViewControllerKVOContext = 0;
     self.navigationController.hidesBarsOnSwipe = self.hideBarsWithGestures;
     self.navigationController.hidesBarsWhenKeyboardAppears = self.hideBarsWithGestures;
     self.navigationController.hidesBarsWhenVerticallyCompact = self.hideBarsWithGestures;
-
+    
     if (self.hideBarsWithGestures) {
         [self.navigationBar addObserver:self forKeyPath:@"hidden" options:NSKeyValueObservingOptionNew context:&DZNWebViewControllerKVOContext];
         [self.navigationBar addObserver:self forKeyPath:@"center" options:NSKeyValueObservingOptionNew context:&DZNWebViewControllerKVOContext];
         [self.navigationBar addObserver:self forKeyPath:@"alpha" options:NSKeyValueObservingOptionNew context:&DZNWebViewControllerKVOContext];
     }
-
+    
     if (!DZN_IS_IPAD && self.navigationController.toolbarHidden && self.toolbarItems.count > 0) {
         [self.navigationController setToolbarHidden:NO];
     }
+    [self.toolbar setHidden:!self.isShowToolbar];
+    [self.navigationController setToolbarHidden:!self.isShowToolbar];
 }
 
 // Light hack for adding custom gesture recognizers to UIBarButtonItems
@@ -581,7 +586,7 @@ static char DZNWebViewControllerKVOContext = 0;
 - (void)updateToolbarItems
 {
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:[self.webView isLoading]];
-
+    
     self.backwardBarItem.enabled = [self.webView canGoBack];
     self.forwardBarItem.enabled = [self.webView canGoForward];
     
@@ -706,7 +711,7 @@ static char DZNWebViewControllerKVOContext = 0;
     switch (error.code) {
         case NSURLErrorCancelled:   return;
     }
-
+    
     self.title = nil;
 }
 
@@ -761,7 +766,7 @@ static char DZNWebViewControllerKVOContext = 0;
     
     cell.textLabel.text = item.title;
     cell.detailTextLabel.text = [item.URL absoluteString];
-
+    
     return cell;
 }
 
@@ -832,6 +837,8 @@ static char DZNWebViewControllerKVOContext = 0;
                         subview.alpha = 0.0;
                     }
                 }
+                [self.toolbar setHidden:!self.isShowToolbar];
+                [self.navigationController setToolbarHidden:!self.isShowToolbar];
                 
                 [UIView commitAnimations];
             }

@@ -25,6 +25,8 @@
     DZNWebViewController *controller = [[DZNWebViewController alloc] initWithURL:[NSURL URLWithString:@"https://dribbble.com/"]];
 #endif
     
+    controller.showToolbar = YES;
+//    controller.supportedWebNavigationTools = DZNWebNavigationToolNone;
     UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:controller];
     self.window.rootViewController = navController;
     
